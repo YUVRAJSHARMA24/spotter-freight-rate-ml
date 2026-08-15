@@ -105,96 +105,121 @@ The final model is a `CatBoostRegressor` trained on:
 ```text
 log1p(posted_rate)
 
+```
+
 Predictions are converted back to the original dollar scale using:
 
+```text
 expm1(prediction)
+```
 
-Final Configuration
+### Final Configuration
 
-| Parameter             |                Value |
-| --------------------- | -------------------: |
-| Model                 |    CatBoostRegressor |
+| Parameter | Value |
+|---|---:|
+| Model | CatBoostRegressor |
 | Target transformation | `log1p(posted_rate)` |
-| Iterations            |                  300 |
-| Depth                 |                    8 |
-| Learning rate         |                 0.04 |
-| L2 regularization     |                    5 |
-| Random seed           |                   42 |
-
+| Iterations | 300 |
+| Depth | 8 |
+| Learning rate | 0.04 |
+| L2 regularization | 5 |
+| Random seed | 42 |
 
 The final model was retrained using all 48,000 labeled observations before generating the final validation predictions.
 
-Model Comparison
+## Model Comparison
 
-| Model                             | October MAE | October RMSE |
-| --------------------------------- | ----------: | -----------: |
-| Random Forest baseline            |     $159.87 |      $689.32 |
-| CatBoost                          |     $115.54 |      $651.06 |
-| Feature-engineered CatBoost       |     $107.32 |      $646.50 |
-| Log-target CatBoost               |     $107.12 |      $646.22 |
-| Log-target CatBoost without route |     $106.39 |      $646.00 |
-| Final feature set                 | **$106.04** |      $646.81 |
+| Model | October MAE | October RMSE |
+|---|---:|---:|
+| Random Forest baseline | $159.87 | $689.32 |
+| CatBoost | $115.54 | $651.06 |
+| Feature-engineered CatBoost | $107.32 | $646.50 |
+| Log-target CatBoost | $107.12 | $646.22 |
+| Log-target CatBoost without route | $106.39 | $646.00 |
+| Final feature set | **$106.04** | $646.81 |
 
 The final feature set was selected based on chronological validation performance rather than random cross-validation.
 
-Final Predictions
+## Final Predictions
 
 The final model generates:
-validation_predictions.csv
+
+`validation_predictions.csv`
 
 with the required format:
 
-load_id,predicted_rate
+`load_id,predicted_rate`
 
 The final prediction file contains:
 
-12,000 predictions
-12,000 unique load IDs
-Positive predicted rates
+- 12,000 predictions
+- 12,000 unique load IDs
+- Positive predicted rates
 
-The supplied score.py successfully validated all 12,000 final predictions.
+The supplied `score.py` successfully validated all 12,000 final predictions.
 
 The supplied scorer also successfully validated the 31 December predictions.
 
-December 2025 Scenario
+## December 2025 Scenario
 
 The fixed December scenario uses:
 
-Pickup: Lexington
-Delivery: Fort Wayne
-Distance: 360 miles
-Equipment: Dry Van
-Weight: 32,000 lb
-Date: December 1–31, 2025
+- **Pickup:** Lexington
+- **Delivery:** Fort Wayne
+- **Distance:** 360 miles
+- **Equipment:** Dry Van
+- **Weight:** 32,000 lb
+- **Date:** December 1–31, 2025
 
 Only the date changes between the 31 predictions.
 
-The generated December predictions ranged from approximately $801 to $827, with an average of approximately $815.54.
+The generated December predictions ranged from approximately **$801 to $827**, with an average of approximately **$815.54**.
 
-Because market_index and quote_signal are not provided in the December input file, training-data median values were used for those unavailable features.
+Because `market_index` and `quote_signal` are not provided in the December input file, training-data median values were used for those unavailable features.
 
-Running the Project
-1. Create a virtual environment
+## Running the Project
+
+### 1. Create a virtual environment
+
+```bash
 python -m venv .venv
-2. Activate the environment
+```
+
+### 2. Activate the environment
 
 Windows PowerShell:
 
+```powershell
 .venv\Scripts\Activate.ps1
-3. Install dependencies
+```
+
+### 3. Install dependencies
+
+```bash
 pip install -r requirements.txt
-4. Train the final model and generate predictions
+```
+
+### 4. Train the final model and generate predictions
+
+```bash
 python final_model.py
+```
 
 This generates the final validation predictions and December predictions.
 
-5. Validate the outputs
+### 5. Validate the outputs
+
+```bash
 python score.py --predictions validation_predictions.csv --december-predictions data/december_chart_inputs.csv
+```
 
 The scorer generates:
 
-scorer_results/candidate_december.png
-Project Structure
+`scorer_results/candidate_december.png`
+
+## Project Structure
+
+```text
 .
 ├── README.md
 ├── requirements.txt
@@ -202,26 +227,30 @@ Project Structure
 ├── final_model.py
 ├── score.py
 └── .gitignore
-Repository Notes
+```
+
+## Repository Notes
 
 The assessment datasets and locally generated prediction files are intentionally excluded from the public repository.
 
 The repository contains the core modeling code, validation/scoring code, dependencies, and documentation required to understand and reproduce the solution when the assessment data is available.
 
-Limitations
-The hidden November–December target values are unavailable, so the final hidden-test score cannot be measured before submission.
-Rare extreme-rate observations remain more difficult to predict.
-The December scenario does not provide market_index or quote_signal, so training-data median values were used for those features.
-Conclusion
+## Limitations
+
+- The hidden November–December target values are unavailable, so the final hidden-test score cannot be measured before submission.
+- Rare extreme-rate observations remain more difficult to predict.
+- The December scenario does not provide `market_index` or `quote_signal`, so training-data median values were used for those features.
+
+## Conclusion
 
 The final solution combines:
 
-Time-aware validation
-Freight-specific feature engineering
-Explicit handling of invalid weight values
-Log-target regression
-CatBoost
+- Time-aware validation
+- Freight-specific feature engineering
+- Explicit handling of invalid weight values
+- Log-target regression
+- CatBoost
 
-The model achieved approximately $106 MAE on both September and October chronological holdouts.
+The model achieved approximately **$106 MAE** on both September and October chronological holdouts.
 
 The final prediction files also passed the provided Spotter scorer successfully.
