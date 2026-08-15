@@ -1,0 +1,22 @@
+# Python virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# CatBoost training logs
+catboost_info/
+
+# Generated scorer output
+scorer_results/
+
+# Local prediction output
+validation_predictions.csv
+
+# Local data / assessment inputs
+data/
+
+# OS files
+.DS_Store
+Thumbs.db
